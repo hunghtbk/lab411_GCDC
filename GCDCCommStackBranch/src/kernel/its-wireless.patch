@@ -1,0 +1,28 @@
+Index: wireless/nl80211.c
+===================================================================
+--- wireless/nl80211.c	(.../Comm%20Stack/src/kernel/wireless)	(revision 176)
++++ wireless/nl80211.c	(.../GCDC/GCDCCommStackBranch/src/kernel/wireless)	(working copy)
+@@ -3294,7 +3294,8 @@
+ 	if (info->attrs[NL80211_ATTR_BEACON_INTERVAL]) {
+ 		ibss.beacon_interval =
+ 			nla_get_u32(info->attrs[NL80211_ATTR_BEACON_INTERVAL]);
+-		if (ibss.beacon_interval < 1 || ibss.beacon_interval > 10000)
++		/* ITS fix: allow a beacon interval of 0, switching beacons off */
++		if (ibss.beacon_interval < 0 || ibss.beacon_interval > 10000)
+ 			return -EINVAL;
+ 	}
+ 
+Index: wireless/reg.c
+===================================================================
+--- wireless/reg.c	(.../Comm%20Stack/src/kernel/wireless)	(revision 176)
++++ wireless/reg.c	(.../GCDC/GCDCCommStackBranch/src/kernel/wireless)	(working copy)
+@@ -994,6 +994,9 @@
+ 		return;
+ 	}
+ 
++	/* make sure channels in the domain are enabled */
++	flags &= ~IEEE80211_CHAN_DISABLED;
++
+ 	power_rule = &reg_rule->power_rule;
+ 	freq_range = &reg_rule->freq_range;
+ 
